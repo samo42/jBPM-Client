@@ -1,32 +1,23 @@
 package com.example.jbpm_client;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.util.EntityUtils;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.Canvas;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Environment;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -40,6 +31,7 @@ public class Picture extends Activity {
 	private String processId = "";
 	private String nodes = "";
 	private boolean showImage;
+	private Bitmap bm = null;
 
 
 	
@@ -74,6 +66,17 @@ public class Picture extends Activity {
 	    if (map.containsKey("currentNodeName")){
 	    	setNodes(map.get("currentNodeName"));
 	    }
+	}
+	
+	//call this method when session expired
+	public void sessionExpired(){
+		SharedPreferences settings = getSharedPreferences("SETTING_Infos", 0);
+		if(settings.contains("COOKIE")) {
+			SharedPreferences.Editor editor = settings.edit();
+            editor.remove("COOKIE");
+            editor.commit(); }
+		Intent intent = new Intent(this, MainActivity.class);
+		startActivity(intent);
 	}
 	
 	public String getServer(){
@@ -119,7 +122,7 @@ public class Picture extends Activity {
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 	    MenuInflater inflater = getMenuInflater();
-	    inflater.inflate(R.menu.activity_process_list, menu);
+	    inflater.inflate(R.menu.activity_picture, menu);
 	    return true;
 	}
 			
@@ -127,6 +130,18 @@ public class Picture extends Activity {
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item){
 		switch (item.getItemId()){
+			case R.id.picture_save:
+				String extStorageDirectory = Environment.getExternalStorageDirectory().toString();
+				File file = new File(extStorageDirectory, getInstanceId()+getProcessId()+(this).toString()+".PNG");
+				try {
+				    FileOutputStream outStream = new FileOutputStream(file);
+				    bm.compress(Bitmap.CompressFormat.PNG, 100, outStream);
+				    outStream.flush();
+				    outStream.close();
+				} catch (Exception e) {
+				    e.printStackTrace();}
+				return true;
+		
 			case R.id.refresh:
 				//execute rest
 				if (getImage() == true){
@@ -170,91 +185,28 @@ public class Picture extends Activity {
 				bitmap = rc.getPictureFromResponse(rc.getResponse(diagramUrl));
 				HttpResponse response = rc.getResponse(nodesUrl);
 				String dimensions = rc.convertResponseToString(response);
-				System.out.println("one");
 				JsonParser jp = new JsonParserImpl();
 				dimensionsList = jp.parseNodes(dimensions);
-				System.out.println("twho");
 				PictureEditor pe = new PictureEditorImpl();
-				System.out.println("3");
 				bitmap = pe.combineImages(bitmap, arrow, dimensionsList);
-				System.out.println("for");
-
+				
 			}
 			if (operation.equals("logout")){
 				rc.logout(server);
+				return null;
 			}
 			return bitmap;
-
 		}
 		
 		protected void onPostExecute(Bitmap diagram){
-			Toast.makeText(getApplicationContext(), "command sent", Toast.LENGTH_LONG).show();
-            if (diagram != null){
+			if (diagram != null){
+            	Toast.makeText(getApplicationContext(), R.string.picture, Toast.LENGTH_LONG).show();
             	tv = (ImageView) findViewById(R.id.logo);
             	tv.setImageBitmap(diagram);
+            	bm = diagram;
+            } else {
+            	sessionExpired();
             }
-		}
-		
-		public ArrayList<ArrayList<String>> parse(String jSONString){
-			ArrayList<ArrayList<String>> dimensionList = new ArrayList<ArrayList<String>>();
-			
-			JSONArray dimensions = null;
-			try {
-				dimensions = new JSONArray(jSONString);
-				
-				for(int i = 0; i < dimensions.length(); i++){
-					JSONObject jObject = dimensions.getJSONObject(i);
-					ArrayList<String> list = new ArrayList<String>();
-					
-					String width = jObject.getString("width");
-					System.out.println(width);
-					
-					String height = jObject.getString("height");
-					System.out.println(height);
-
-					JSONObject nodeObject = jObject.getJSONObject("activeNode");
-						
-					String nodeWidth = nodeObject.getString("x");
-					System.out.println(nodeWidth);
-						
-					String nodeHeight = nodeObject.getString("y");
-					System.out.println(nodeHeight);
-					list.add(width);
-					list.add(height);
-					list.add(nodeWidth);
-					list.add(nodeHeight);
-					dimensionList.add(list);
-				}
-					
-			} catch (JSONException e) {
-				e.printStackTrace();
-			}
-			return dimensionList;
-		}
-		
-		
-		public Bitmap combineImages(Bitmap diagram, ArrayList<ArrayList<String>> dimensionsList){
-			Bitmap arrow = BitmapFactory.decodeResource(getResources(), R.drawable.arrow);
-			arrow = arrow.createScaledBitmap(arrow, 23, 26, false);
-			
-			Bitmap combined = null;
-				
-			int width, height, nodeWidth, nodeHeight = 0; 
-			
-			ArrayList<String> getSize = dimensionsList.get(0);
-		    width = Integer.parseInt(getSize.get( 0 ));
-			height = Integer.parseInt(getSize.get( 1 ));
-			Bitmap croppedDiagram = Bitmap.createBitmap(diagram, 0, 0, width, height);
-			combined = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
-		    Canvas comboImage = new Canvas(combined);
-			comboImage.drawBitmap(croppedDiagram, 0f, 0f, null);
-			for( ArrayList<String> inList : dimensionsList ) {
-				nodeWidth = Integer.parseInt(inList.get( 2 ));
-				nodeHeight = Integer.parseInt(inList.get( 3 ));
-				comboImage.drawBitmap(arrow, nodeWidth-12, nodeHeight-12, null);
-			}
-			
-		    return combined;
 		}
 	}
 }

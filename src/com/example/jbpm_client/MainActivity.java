@@ -17,6 +17,11 @@ import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.Toast;
 
+/**
+ * Main Activity is the first activity user
+ * sees when using application. 
+ *
+ */
 public class MainActivity extends Activity {
 	public static final String SETTING_INFOS = "SETTING_Infos";
 	public static final String SERVER_INFOS = "SERVER_Infos";
@@ -43,7 +48,10 @@ public class MainActivity extends Activity {
         fillUsernameAndPassword();
      }
 	
-	//on login button press
+	/**
+	 * When user presses login button, authentization is executed. 
+	 *
+	 */
 	public void login(View view) {
     	if (cb.isChecked()) {
     		rememberUsernameAndPassword();
@@ -56,13 +64,17 @@ public class MainActivity extends Activity {
     	}
 	}
     
-	//if log in was succesful, show process instances
+	/**
+	 * if log in was succesful, show process instances 
+	 */
 	public void resume(){
 		Intent intent = new Intent(this, ProcessList.class);
     	startActivity(intent);
 	}
 	
-	//create menu
+	/**
+	 * create menu
+	 */
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 	    MenuInflater inflater = getMenuInflater();
@@ -70,7 +82,9 @@ public class MainActivity extends Activity {
 	    return true;
 	}
 	
-	//clicking on them
+	/**
+	 * clicking on them
+	 */
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item){
 		switch (item.getItemId()){
@@ -92,7 +106,9 @@ public class MainActivity extends Activity {
 		return false;
 	}
 	
-	//fill in username and password previously remembered from shared prefs
+	/**
+	 * fill in username and password previously remembered from shared prefs
+	 */
     public void fillUsernameAndPassword(){
         SharedPreferences settings = getSharedPreferences(SETTING_INFOS, 0);
         String username = settings.getString(USERNAME, "");
@@ -101,7 +117,9 @@ public class MainActivity extends Activity {
         fieldPass.setText(password);
     }
     
-    //save new username and password to shared preferences
+    /**
+     * save new username and password to shared preferences
+     */
     public void rememberUsernameAndPassword(){
     	SharedPreferences settings = getSharedPreferences(SETTING_INFOS, 0);
         settings.edit()
@@ -123,7 +141,9 @@ public class MainActivity extends Activity {
     	return password;
     }
     
-    //get servername from shared prefs
+    /**
+     * get servername from shared prefs
+     */
     public String getServer(){
 		SharedPreferences settings = getSharedPreferences(SERVER_INFOS, 0);
         String server = settings.getString(SERVER, "");
@@ -131,33 +151,31 @@ public class MainActivity extends Activity {
 	}
     
 
-    //starts new thread, log in user and save session cookie into shared prefs
+    /**
+     * starts new thread, authentificates in user and saves session cookie into shared prefs
+     */
     private class logInAsyncTask extends AsyncTask<String, Boolean, Boolean>{
 		
 		@Override
 		protected Boolean doInBackground(String... params) {
-			System.out.println("1");
 			//get parameters needed to log in
 			String username = params[0];
 			String password = params[1];
 			String server = params[2];
 			//put username and password into hashmap
 			HashMap<String, String> dataSet = new HashMap<String, String>();
-			System.out.println("2");
 			dataSet.put(KEY_USERNAME,username);
 			dataSet.put(KEY_PASSWORD,password);
 			//make URL's
 			String sidUrl = "http://"+server+"/gwt-console-server/rs/identity/secure/sid";
 			String authUrl = "http://"+server+"/gwt-console-server/rs/process/j_security_check";
 			//execute rest calls
-			System.out.println("3");
 			RestClient rc = new RestClientImpl();
 			HttpResponse authResponse = rc.getResponse(sidUrl);
 			String cookie = rc.initCookie(authResponse);
 			rc.convertResponseToString(authResponse);
 			HttpResponse response = rc.postData(authUrl, dataSet);
 			String SID = rc.convertResponseToString(response);
-			System.out.println("4");
 			//save SID cookie into shared preferences
 			SharedPreferences settings = getSharedPreferences(SETTING_INFOS, 0);
 	        settings.edit()

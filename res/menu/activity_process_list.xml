@@ -1,8 +1,8 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 	<item
         android:id="@+id/refresh"
-        android:title="Refresh"></item>
+        android:title="@string/refresh"></item>
     <item
         android:id="@+id/log_out"
-        android:title="Log Out"></item>
+        android:title="@string/log_out"></item>
 </menu>

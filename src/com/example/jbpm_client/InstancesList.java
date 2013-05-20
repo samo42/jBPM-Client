@@ -1,17 +1,14 @@
 package com.example.jbpm_client;
+/**
+ * @author Samo
+ * 
+ * in this activity processes are shown
+ */
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.HashMap;
 
 import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.mime.HttpMultipartMode;
-import org.apache.http.entity.mime.MultipartEntity;
-import org.apache.http.entity.mime.content.StringBody;
-import org.apache.http.impl.client.DefaultHttpClient;
 import org.htmlcleaner.TagNode;
 
 import android.app.AlertDialog;
@@ -44,6 +41,13 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+/**
+ * special method to parse JSONObject
+ * containing informations about processes 
+ *
+ * @param	response	String response from REST call
+ * @return	ArrayList of HashMaps<String, String>
+ */
 public class InstancesList extends ListActivity {
 	public static final String SETTING_INFOS = "SETTING_Infos";
 	public static final String SERVER_INFOS = "SERVER_Infos";
@@ -71,6 +75,9 @@ public class InstancesList extends ListActivity {
 	    new GetInstances().execute(params);
 	}
 
+	/**
+	 * retrieve data from previous instance, in this case ProcessList as serializable hashmap
+	 */
 	public void readIntent(){
 		Intent intent= getIntent();
 	    //String procID = intent.getStringExtra("process"); // will return "FirstKeyValue"
@@ -92,8 +99,6 @@ public class InstancesList extends ListActivity {
 	    	setprocessId(map.get("id"));
 	}
 	
-	
-	//hovori samo za seba
 	public void onCreateContextMenu(ContextMenu menu, View v,ContextMenuInfo menuInfo) {  
 		AdapterView.AdapterContextMenuInfo info = 
 		        (AdapterView.AdapterContextMenuInfo) menuInfo;
@@ -101,19 +106,19 @@ public class InstancesList extends ListActivity {
 		
 		super.onCreateContextMenu(menu, v, menuInfo);  
 		    menu.setHeaderTitle(getprocessId());  
-		    menu.add(0, v.getId(), 0, "Delete");  
-		    menu.add(0, v.getId(), 0, "Terminate");  
+		    menu.add(0, v.getId(), 0, R.string.delete);  
+		    menu.add(0, v.getId(), 0, R.string.terminate);  
 		}  
 
 	@Override  
 	public boolean onContextItemSelected(MenuItem item) {  
-		if(item.getTitle()=="Delete"){
+		if(item.getTitle().equals(getResources().getString(R.string.delete))){
 			String instanceId = visibleList.get(lastPosition).get("id");
 			String[] newParams = new String[] {getServer(),getprocessId(), instanceId, "delete"};
 			new GetInstances().execute(newParams);
 			return true;
 			} 
-		if(item.getTitle()=="Terminate"){
+		if(item.getTitle().equals(getResources().getString(R.string.terminate))){
 	       String instanceId = visibleList.get(lastPosition).get("id");
 			String[] newParams = new String[] {getServer(),getprocessId(), instanceId, "terminate"};
 			new GetInstances().execute(newParams);
@@ -122,7 +127,6 @@ public class InstancesList extends ListActivity {
 		return false; 
 	}  
 	
-	//create menu
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 	    MenuInflater inflater = getMenuInflater();
@@ -130,7 +134,6 @@ public class InstancesList extends ListActivity {
 	    return true;
 	}
 		
-	//make actions after clicking on menu items
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item){
 		switch (item.getItemId()){
@@ -142,8 +145,8 @@ public class InstancesList extends ListActivity {
 				
 			case R.id.new_instance:
 				//start new instance
-				String[] params = new String[] {getServer(), getprocessId()};
 				if (hasform() == true){
+					String[] params = new String[] {getServer(), getprocessId()};
 					new GetForm().execute(params);
 				} else {
 					String[] newParams = new String[] {getServer(), getprocessId(), "", "new1"};
@@ -154,13 +157,18 @@ public class InstancesList extends ListActivity {
 			case R.id.log_out:
 				//remove session cookie and show log in screen
 				String[] logoutParams = new String[] {getServer(), getprocessId(), "", "logout"};
+				new GetInstances().execute(logoutParams);
 				return true;
 				}
 			return false;
 	}
 
-	//the popUp window apearing when starting new instance
-	//public void fillForm(final HashMap<String, ArrayList<String>> map){
+	/**
+	 * Shows new popup window. Here are also ViewElements converting to View,
+	 * and inflating. Then it processes the info. It is also happening here
+	 * because of not so easy work with View and Context.
+	 * @param	list	ArrayList of ViewElements
+	 */
 	public void fillForm(ArrayList<ViewElement> list){
 		
 		LayoutInflater li = LayoutInflater.from(context);
@@ -266,56 +274,47 @@ public class InstancesList extends ListActivity {
 			  new DialogInterface.OnClickListener() {
 			    public void onClick(DialogInterface dialog,int id) {
 			    
-			    ArrayList<String> fin = new ArrayList<String>();
-			    System.out.println("2");	
-			    for (int i = 0; i < ((ViewGroup)promptsView).getChildCount(); i++){
-			       	View view = ((ViewGroup)promptsView).getChildAt(i);
+			    //GET INFO FROM USER IN LIST
+			    ArrayList<String> attributes = new ArrayList<String>();
+				    
+				for (int i = 0; i < ((ViewGroup)promptsView).getChildCount(); i++){
+					View view = ((ViewGroup)promptsView).getChildAt(i);
 
-			    	System.out.println("view"+view.getClass().getName());
-			    	if (view instanceof EditText) {
-			    		fin.add(((EditText) view).getText().toString());
-			    		fin.add(((EditText) view).getHint().toString());
-				    	System.out.println("edit");
-
-			    	}
-			    	else if (view instanceof RadioGroup) {
-			    		int button = ((RadioGroup) view).getCheckedRadioButtonId();
-			    		fin.add(((RadioButton)((RadioGroup) view).findViewById(button)).getHint().toString());
-			    		fin.add(((RadioGroup) view).getTag().toString());
+				    
+				    if (view instanceof EditText) {
+				    	attributes.add(((EditText) view).getText().toString());
+				    	attributes.add(((EditText) view).getHint().toString());
+					}
+				    else if (view instanceof RadioGroup) {
+				    	int button = ((RadioGroup) view).getCheckedRadioButtonId();
+				    	attributes.add(((RadioButton)((RadioGroup) view).findViewById(button)).getHint().toString());
+				    	attributes.add(((RadioGroup) view).getTag().toString());
+					}
+				    else if (view instanceof NumberPicker) {
+				    	attributes.add(((Integer)((NumberPicker) view).getValue()).toString());
+				    	attributes.add(((NumberPicker) view).getTag().toString());
 				    }
-			    	else if (view instanceof NumberPicker) {
-			    		fin.add(((Integer)((NumberPicker) view).getValue()).toString());
-			    		fin.add(((NumberPicker) view).getTag().toString());
-			    	}
-			    	else if (view instanceof CheckBox) {
-			    		if (((CheckBox)view).isChecked()){
-			    			fin.add(((CheckBox) view).getHint().toString());
-			    			fin.add(((CheckBox) view).getTag().toString());
-					    	System.out.println("cb");
-					    	i++;
-			    		}
-			    	} 
-			    	else if (view instanceof Spinner) {
-			    		System.out.println("spin");
-			    		System.out.println(((Spinner) view).getSelectedItem().toString());
-			    		fin.add(((HashMap<String, String>)((Spinner) view).getSelectedItem()).get("value").toString());
-			    		fin.add(view.getTag().toString());
-			        }
-			    	System.out.println("3");
-			    }
-			    System.out.println("4");
-			    String[] newParams = new String[4+fin.size()];
+				    else if (view instanceof CheckBox) {
+				    	if (((CheckBox)view).isChecked()){
+				    		attributes.add(((CheckBox) view).getHint().toString());
+				    		attributes.add(((CheckBox) view).getTag().toString());
+				    	}
+				    } 
+				    else if (view instanceof Spinner) {
+				    	attributes.add(((HashMap<String, String>)((Spinner) view).getSelectedItem()).get("value").toString());
+				    	attributes.add(view.getTag().toString());
+				    }
+				 }
+			    //SAVE IT TO ARRAY
+			    String[] newParams = new String[4+attributes.size()];
 			    newParams[0]=getServer();
-			    newParams[1]=processId;
+			    newParams[1]=getprocessId();
 			    newParams[2]="";
 			    newParams[3]="new";
-			    for (int i = 0; i<fin.size(); i++){
-			    	newParams[i+4]=fin.get(i);
+			    for (int i = 0; i<attributes.size(); i++){
+			    	newParams[i+4]=attributes.get(i);
 			    }
-			    System.out.println(newParams.length);
-			    System.out.println(newParams.toString());
-			    
-			    new GetInstances().execute(newParams); //TOTOTOOTOTOTOT
+			    new GetInstances().execute(newParams);
 			    }
 			  })
 			.setNegativeButton("Cancel",
@@ -326,19 +325,16 @@ public class InstancesList extends ListActivity {
 			  });
 		// create alert dialog
 		AlertDialog alertDialog = alertDialogBuilder.create();
-		//alertDialog.setTitle(visibleList.get(0).get("description").);
-		//alertDialog.setTitle("Employee Evaluation");
 		// show it
 		alertDialog.show();
 	}
 	
-		
-	public String getServer(){
-		SharedPreferences settings = getSharedPreferences(SERVER_INFOS, 0);
-        String server = settings.getString(SERVER, "");
-		return server;
-	}
 	
+	/**
+	 * fills listactivity with data about processes from server
+	 * 
+	 * @param	list	ArrayList of ViewElements
+	 */
 	public void populateList(ArrayList<HashMap<String, String>> visibleList){
 		for (HashMap<String, String> map : visibleList){
 			if (map.containsKey("suspended")){
@@ -351,32 +347,21 @@ public class InstancesList extends ListActivity {
 			}
 		}
 		SimpleAdapter adapter = new SimpleAdapter(this, visibleList,R.layout.row_instances,new String[] {"id" , "startDate" , "suspended"}, new int[] {R.id.instance_id, R.id.startdate, R.id.state});
-		//setList();
 		setListAdapter(adapter);
 		setVisibleList(visibleList);
 	}
 	
-	public boolean hasImage(){
-		return image;
-	}
-	
-	public void setImage(boolean id){
-		image = id;
-	}
-	
+	/**
+	 * when user clicks on process, mapping of that process is saved and 
+	 * new activity is started
+	 */
 	@Override
 	protected void onListItemClick(ListView l, View v, int position, long id) {
-		//String selection = l.getItemAtPosition(position).toString();
 		HashMap<String, String> map = (HashMap<String, String>) l.getItemAtPosition(position);
 		if (hasImage() == true)
 			map.put("diagram", "diagram");
 		Intent intent = new Intent(this, Picture.class);
-		//intent.putExtra("com.example.jbpm_client.instanceId", map.get("definitionId"));
-		//intent.putExtra("com.example.jbpm_client.processId", map.get("id"));
 		intent.putExtra("hashMap", map);
-		//if (hasImage() == true)
-		//	intent.putExtra("com.example.jbpm_client.showImage", "");
-		//
 		startActivity(intent);
 	}
 	
@@ -391,6 +376,24 @@ public class InstancesList extends ListActivity {
 	}
 	
 	//getry and setry
+	/**
+	 * get serverName from shared prefs
+	 * @return	server	server for connecting to rest interface
+	 */
+	public String getServer(){
+		SharedPreferences settings = getSharedPreferences(SERVER_INFOS, 0);
+        String server = settings.getString(SERVER, "");
+		return server;
+	}
+	
+	public boolean hasImage(){
+		return image;
+	}
+	
+	public void setImage(boolean id){
+		image = id;
+	}
+	
 	public void setprocessId(String id){
 		processId = id;
 	}
@@ -423,9 +426,11 @@ public class InstancesList extends ListActivity {
 		return visibleList;
 	}
 		
+	/**
+	 * In this class asynchronious operations on background thread are running.
+	 * Mostly REST calls but also json parsing. 
+	 */
 	private class GetInstances extends AsyncTask<String, Void, ArrayList<HashMap<String, String>>>{
-		
-		private final HttpClient Client = new DefaultHttpClient(); 
 		
 		@Override
 		protected ArrayList<HashMap<String, String>> doInBackground(String... params) {
@@ -445,48 +450,51 @@ public class InstancesList extends ListActivity {
 			if (operation == "terminate") {
 				url = "http://"+server+"/gwt-console-server/rs/process/instance/"+ instanceId +"/end/OBSOLETE";
 				rc.postData(url, null);
-				//terminate(server, instanceId);
-			} else
-			if (operation == "delete") {
+			}
+			else if (operation == "delete") {
 				url = "http://"+server+"/gwt-console-server/rs/process/instance/" + instanceId + "/delete";
-				rc.postData(url, null);
-				//delete(server, instanceId);
-			} else
-			
-			if (operation == "new") {
+				HashMap<String, String> dataSet = new HashMap<String, String>();
+				dataSet.put("delete", "android");
+				rc.postData(url, dataSet);
+			}
+			else if (operation == "new") {
 				url = "http://"+server+"/gwt-console-server/rs/form/process/"+ processId +"/complete";
-				//rc.postMultipart(url, dataSet);
-				startNew(server, processId, params); //params pridane
-			} else
-			
-			if (operation == "new1"){
+				HashMap<String, String> dataSet = new HashMap<String, String>();
+				if (params.length>3){
+					for (int i = 4; i<params.length; i++){
+						dataSet.put(params[i+1], params[i]);
+						i++;
+						System.out.println(dataSet.keySet().size());
+					}
+					rc.postMultipart(url, dataSet);
+				}
+			}
+			else if (operation == "new1"){
 				url = "http://"+server+"/gwt-console-server/rs/process/definition/" + processId + "/new_instance";
 				rc.postData(url, null);
-				//newInstance(server, processId);
+			}
+			
+			else if (operation == "logout"){
+				rc.logout(server);
+				return null;
 			}
 			
 			url = "http://" + server + "/gwt-console-server/rs/process/definition/" + processId + "/instances";
-			System.out.println(url);
 			HttpResponse response = rc.getResponse(url);
 			String responseString = rc.convertResponseToString(response);
-			//String response = getList(server, processId);
-			System.out.println(responseString);
 			if (responseString.startsWith("{")){
 				JsonParser jp = new JsonParserImpl();
 				instancesList = jp.parseInstances(responseString);
-				//instancesList = parser(response);
 				} else { 
-					HashMap<String, String> map = new HashMap<String, String>();
-					map.put("com.example.error", "com.exaple.error");
-					instancesList.add(map);
 					rc.logout(server);
+					return null;
 					}
 			
 				return instancesList;
 		}
 		
 		protected void onPostExecute(ArrayList<HashMap<String, String>> instancesList){
-			if (instancesList.get(0).containsKey("com.example.error")){
+			if(instancesList == null){
 				sessionExpired();
 			} else {
 				populateList(instancesList);
@@ -494,38 +502,13 @@ public class InstancesList extends ListActivity {
 			}
 		}
 		
-				public void startNew(String server, String id, String[] params) {
-			HttpPost request = new HttpPost("http://"+server+"/gwt-console-server/rs/form/process/"+id+"/complete");
-			
-			try {
-				SharedPreferences settings = getSharedPreferences("SETTING_Infos", 0);
-		        String cookie = settings.getString("COOKIE", "");
-		        request.setHeader("Cookie", "JSESSIONID="+cookie);
-		        
-		        MultipartEntity entity = new MultipartEntity( HttpMultipartMode.BROWSER_COMPATIBLE );
-		        
-		        for (int i = 4; i < (params.length - 1); i=i+2){		//like, WUUUUUUUT?
-		        	entity.addPart(params[i+1], new StringBody(params[i]));
-		        	System.out.println("added"+params[i+1]+"and body"+params[i]);
-				}
-		        
-		        request.setEntity(entity);
-
-		        HttpResponse response = Client.execute(request);
-				// Get the response
-				BufferedReader rd = new BufferedReader
-						(new InputStreamReader(response.getEntity().getContent()));
-				String line = "";
-				while ((line = rd.readLine()) != null) {
-					System.out.println("newInstance..." + line);
-				}
-			} catch (Exception e) {
-		      e.printStackTrace();
-			}
-		}
 	}//end asynctask
 
-	//private class GetForm extends AsyncTask<String, Void, HashMap<String, ArrayList<String>>>{
+	/**
+	 * asynctask to download html form via REST.
+	 * In onPostExecute, fillform is called
+	 * 
+	 */
 	private class GetForm extends AsyncTask<String, Void, ArrayList<ViewElement>>{
 		
 		protected ArrayList<ViewElement> doInBackground(String... params) {
@@ -545,7 +528,6 @@ public class InstancesList extends ListActivity {
 			HtmlParser hp = new HtmlParserImpl();
 			try{
 				TagNode tn = hp.cleanHtml(str);
-				//list = hp.parseForm(tn);
 				list = hp.parse(tn);
 			} catch (Exception e) {
 				e.printStackTrace();
@@ -555,7 +537,7 @@ public class InstancesList extends ListActivity {
 		protected void onPostExecute(ArrayList<ViewElement> list){
 			fillForm(list);
 		}
-	}//end asynctask
-}//end class
+	}
+}
 	
 	

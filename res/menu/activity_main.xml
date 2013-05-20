@@ -1,8 +1,8 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <item
         android:id="@+id/set_up_server"
-        android:title="Set Up Server"></item>
+        android:title="@string/set_up_server"></item>
     <item
         android:id="@+id/clear_user_data"
-        android:title="Clear User Data"></item>
+        android:title="@string/clear_user_data"></item>
 </menu>

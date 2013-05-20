@@ -8,12 +8,26 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+/**
+ * this class is jSON parser written
+ * specially for this application.
+ * Aproach used here is based on that,
+ * we know what data we will get. 
+ *
+ */
 public class JsonParserImpl implements JsonParser {
 	public static final String DEFINITIONS = "definitions";
 	public static final String INSTANCES = "instances";
 	public static final String WIDTH = "width";
 	public static final String HEIGHT = "height";
 	
+	/**
+	 * Parse jsonarray and returns ArrayList 
+	 * of JSONObjects.  
+	 *
+	 * @param	JSONArray
+	 * @return	arraylist of JSONObjects
+	 */
 	public ArrayList<JSONObject> parseArray(JSONArray jArray){
 		ArrayList<JSONObject> jList = new ArrayList<JSONObject>();
 		for(int i = 0; i < jArray.length(); i++){
@@ -27,6 +41,13 @@ public class JsonParserImpl implements JsonParser {
 		return jList;
 	}
 	
+	/**
+	 * Parse JSONArrays and returns hashmaps
+	 * of Strings-pairs, key-value.
+	 *
+	 * @param	JSONArray
+	 * @return	HashMap<String, String>
+	 */
 	public HashMap<String, String> parseObject(JSONObject jObject){
 		Iterator<String> keys = jObject.keys();
 		HashMap<String, String> map = new HashMap<String, String>(); 
@@ -38,6 +59,13 @@ public class JsonParserImpl implements JsonParser {
 		return map;
 	}
 	
+	/**
+	 * special method to parse JSONObject
+	 * containing informations about processes 
+	 *
+	 * @param	response	String response from REST call
+	 * @return	ArrayList of HashMaps<String, String>
+	 */
 	@Override
 	public ArrayList<HashMap<String, String>> parseProcesses(String response){
 		JSONArray initArray = null;
@@ -57,6 +85,13 @@ public class JsonParserImpl implements JsonParser {
 		return mapList;
 	}
 	
+	/**
+	 * special method to parse JSONObject
+	 * containing informations about process instances 
+	 *
+	 * @param	response	String response from REST call
+	 * @return	ArrayList of HashMaps<String, String>
+	 */
 	@Override
 	public ArrayList<HashMap<String, String>> parseInstances(String response){
 		JSONArray initArray = null;
@@ -77,6 +112,14 @@ public class JsonParserImpl implements JsonParser {
 		return mapList;
 	}
 	
+	
+	/**
+	 * special method to parse JSONObject
+	 * containing informations about active nodes 
+	 *
+	 * @param	response	String response from REST call
+	 * @return	ArrayList of HashMaps<String, String>
+	 */
 	@Override
 	public ArrayList<HashMap<String, String>> parseNodes(String response){
 		ArrayList<HashMap<String, String>> mapList = new ArrayList<HashMap<String, String>>();

@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="log_in_success">Log In Successful</string><string name="app_name">jBPM Client</string>
-    <string name="hello_world">Hello world!</string>
+    <string name="log_in_success">Log In Successful</string>
+    <string name="app_name">jBPM Client</string>
     <string name="menu_settings">Settings</string>
     <string name="title_activity_main">MainActivity</string>
     <string name="username">Username:</string>
@@ -25,17 +25,18 @@
     <string name="info">Info</string>
     <string name="refresh">Refresh</string>
     <string name="title_activity_picture">Picture</string>
-    <string name="employee_text">Please fill in your username: </string>
-    <string name="reason_text">Reason: </string>
-    <string name="hint_reason">Reason</string>
     <string name="startdate">Start Date: </string>
     <string name="state">State: </string>
     <string name="version">Version: </string>
     <string name="log_out">Log Out</string>
     <string name="configure_server">Press menu -> Set Up Server to configure your server</string>
-    
     <string name="log_in_unsuccess">Log In Failed</string>
     <string name="processes_loaded">Processes loaded</string>
     <string name="active_nodes">Active Nodes: </string>
-
+	<string name="terminate">Terminate</string>
+	<string name="picture">Picture downloaded</string>
+	<string name="picture_save">Save Diagram as .PNG</string>
+	<string name="set_up_server">Set Up Server</string>
+	<string name="clear_user_data">Clear User Data</string>
+	<string name="new_instance">New Instance</string>
 </resources>

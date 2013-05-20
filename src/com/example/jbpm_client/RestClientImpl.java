@@ -28,6 +28,13 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 
 public class RestClientImpl implements RestClient {
+	/**
+	 * @author Samo
+	 * Simple restclient allows user to authentifiate, send and retrieve data
+	 * and convert data to String format. It also alows user to set
+	 * session cookie, so user dont have to login every time.
+	 * 	
+	 */
 	
 	private final HttpClient Client = new DefaultHttpClient();
 	private String cookie = null;
@@ -41,6 +48,11 @@ public class RestClientImpl implements RestClient {
 		this.cookie = cookie;
 	}
 	
+	/**
+	 * basic GET REST call
+	 * @param	url	full url
+	 * @return HttpResponse
+	 */
 	@Override
 	public HttpResponse getResponse(String url){
 		HttpGet request = new HttpGet(url);
@@ -57,46 +69,72 @@ public class RestClientImpl implements RestClient {
 		return response; 
 	}
 	
+	/**
+	 * basic POST REST call
+	 * allow user to post key-value pairs
+	 * @param url	full url
+	 * @param	dataSet	HashMap<String, String> containing data to send
+	 * @return HttpResponse
+	 */
 	@Override
 	public HttpResponse postData(String url, HashMap<String, String> dataSet){
-		HttpPost post = new HttpPost(url);
+		HttpPost request = new HttpPost(url);
 		HttpResponse response = null;
 		try {
-	    	List<NameValuePair> formsParam=new ArrayList<NameValuePair>();
+			//set Session Id
+			request.setHeader("Cookie", "JSESSIONID="+getCookie());
+			List<NameValuePair> formsParam=new ArrayList<NameValuePair>();
 	    	//save all values to list
-	    	for (Map.Entry<String, String> entry : dataSet.entrySet()) {
-	        	formsParam.add(new BasicNameValuePair(entry.getKey().toString(), entry.getValue().toString()));
-	        }
+	    	if (dataSet != null){
+				for (Map.Entry<String, String> entry : dataSet.entrySet()) {
+	    			formsParam.add(new BasicNameValuePair(entry.getKey().toString(), entry.getValue().toString()));
+	    		}
+	    	}
 	    	//set list as entity
-	    	post.setEntity(new UrlEncodedFormEntity(formsParam));
+	    	request.setEntity(new UrlEncodedFormEntity(formsParam));
 	        //get the response
-	    	response = Client.execute(post);
+	    	response = Client.execute(request);
 	    	   } catch (IOException e) {
 	        	e.printStackTrace();
 	    }
 		return response;
 	}
 	
+	/**
+	 * POST REST call with sending data in MIME-text form
+	 * @param	url	full url
+	 * @param	dataSet	HashMap<String, String> containing data to send
+	 * @return HttpResponse
+	 */
 	@Override
 	public HttpResponse postMultipart(String url, HashMap<String, String> dataSet){
-		HttpPost post = new HttpPost(url);
+		HttpPost request = new HttpPost(url);
 		HttpResponse response = null;
 		try {
+			//set Session Id
+			request.setHeader("Cookie", "JSESSIONID="+getCookie());
 			MultipartEntity multipart = new MultipartEntity( HttpMultipartMode.BROWSER_COMPATIBLE );
 	    	//save all values to list
-	    	for (Map.Entry<String, String> entry : dataSet.entrySet()) {
-	        	multipart.addPart(entry.getKey().toString(), new StringBody(entry.getValue().toString()));
-	        }
+	    	if (dataSet != null){
+	    		for (Map.Entry<String, String> entry : dataSet.entrySet()) {
+	    			multipart.addPart(entry.getKey().toString(), new StringBody(entry.getValue().toString()));
+	    		}
+	    	}
 	    	//set list as entity
-	    	post.setEntity(multipart);
+	    	request.setEntity(multipart);
 	        //get the response
-	    	response = Client.execute(post);
+	    	response = Client.execute(request);
 	    	} catch (IOException e) {
 	    		e.printStackTrace();
 	    }
 		return response;
 	}
 	
+	/**
+	 *	converting HttpResponse to String. 
+	 *	@param HttpResponse
+	 *	@return	String representation 
+	 */
 	@Override
 	public String convertResponseToString(HttpResponse response){
 		StringBuilder sb = new StringBuilder();
@@ -112,6 +150,11 @@ public class RestClientImpl implements RestClient {
 		return sb.toString();	
 	}
 	
+	/**
+	 * method wrote for diagram, converting HttpResponse to bitmap
+	 * @param	HttpResponse
+	 * @return	Bitmap
+	 */
 	@Override
 	public Bitmap getPictureFromResponse(HttpResponse response){
 		Bitmap bitmap = null;
@@ -124,13 +167,17 @@ public class RestClientImpl implements RestClient {
 		return bitmap;
 	}
 	
+	/**
+	 * Catch cookie from head of first HTTP request and save it for later
+	 * @param	HttpResponse
+	 * @return	String representation
+	 */
 	@Override
 	public String initCookie(HttpResponse response){ 
 		Header[] cookie = response.getHeaders("Set-Cookie");
 		String cookieString = null;
 		//String cookieString = "";
 		if (cookie.length == 1){
-			//cookieString = cookie[0].getValue().toString();
 			String wholeString = cookie[0].toString();
 		Pattern pattern = Pattern.compile("(Set-Cookie: JSESSIONID=)(.+)(;)(.+)");
 		Matcher regexMatcher = pattern.matcher(wholeString);
@@ -141,13 +188,19 @@ public class RestClientImpl implements RestClient {
 		return cookieString;
 	}
 	
+	/**
+	 * unvalidate session id, cookie we store will not be valid after this POST call
+	 * @param servername/domain
+	 */
 	@Override
 	public void logout(String server){
-		HttpPost post = new HttpPost("http://"+server+"/gwt-console-server/rs/identity/sid/invalidate");//TODO
+		HttpPost request = new HttpPost("http://"+server+"/gwt-console-server/rs/identity/sid/invalidate");
 		HttpResponse response = null;
 		try {
-	    	//get the response
-	    	response = Client.execute(post);
+			//set Session Id
+			request.setHeader("Cookie", "JSESSIONID="+getCookie());
+			//get the response
+	    	response = Client.execute(request);
 	    	   } catch (IOException e) {
 	        	e.printStackTrace();
 	    }

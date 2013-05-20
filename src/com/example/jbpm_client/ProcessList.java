@@ -17,7 +17,13 @@ import android.view.View;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
 import android.widget.Toast;
-
+/**
+ * This activity extends ListActivity and shows list 
+ * of processes and let user to take one on wich he
+ * want to work.
+ * @author Samo
+ *	
+ */
 public class ProcessList extends ListActivity {
 	public static final String SETTING_INFOS = "SETTING_Infos";
 	public static final String SERVER_INFOS = "SERVER_Infos";
@@ -31,7 +37,9 @@ public class ProcessList extends ListActivity {
 	    new getProcesses().execute(params);	
 	 }
 
-	//create menu
+	/**
+	 * create menu
+	 */
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 	    MenuInflater inflater = getMenuInflater();
@@ -39,7 +47,9 @@ public class ProcessList extends ListActivity {
 	    return true;
 	}
 		
-	//make actions after clicking on menu items
+	/**
+	 * make actions after clicking on menu items
+	 */
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item){
 		switch (item.getItemId()){
@@ -58,20 +68,28 @@ public class ProcessList extends ListActivity {
 			return false;
 	}
 
-	//get servername
+	/**
+	 * get servername
+	 * @return servername from shared prefs
+	 */
 	public String getServer(){
 		SharedPreferences settings = getSharedPreferences(SERVER_INFOS, 0);
         String server = settings.getString(SERVER, "");
 		return server;
 	}
 	
-	//shows list
+	/**
+	 * shows list
+	 * @param visibleList	adapter for this activity
+	 */
 	public void populateList(ArrayList<HashMap<String, String>> visibleList){
 	    SimpleAdapter adapter = new SimpleAdapter(this, visibleList,R.layout.row_process,new String[] {"name" , "version" , "id"}, new int[] {R.id.name, R.id.version, R.id.id});
 		setListAdapter(adapter);
 	}
 	
-	//do action after clicking on list item
+	/**
+	 * do action after clicking on list item
+	 */
 	@Override
 	protected void onListItemClick(ListView l, View v, int position, long id) {
 		HashMap<String, String> map = (HashMap<String, String>) l.getItemAtPosition(position);
@@ -80,7 +98,10 @@ public class ProcessList extends ListActivity {
 		startActivity(intent);
 	}
 	
-	//call this method when session expired
+	
+	/**
+	 * call this method when session expired
+	 */
 	public void sessionExpired(){
 		SharedPreferences settings = getSharedPreferences("SETTING_Infos", 0);
 		if(settings.contains("COOKIE")) {
@@ -90,8 +111,10 @@ public class ProcessList extends ListActivity {
 		Intent intent = new Intent(this, MainActivity.class);
 		startActivity(intent);
 	}
-	
-	//background thread downloading and parsing info about processes from web through REST
+
+	/**
+	 * background thread downloading and parsing info about processes from web through REST
+	 */
 	private class getProcesses extends AsyncTask<String, Void, ArrayList<HashMap<String, String>>>{
 		
 		@Override
@@ -113,6 +136,7 @@ public class ProcessList extends ListActivity {
 			}
 			else if (operation.equals("logout")){
 				rc.logout(server);
+				return null;
 			}
 			ArrayList<HashMap<String, String>> processList = new ArrayList<HashMap<String, String>>();
 			System.out.println("4");
@@ -120,17 +144,14 @@ public class ProcessList extends ListActivity {
 				JsonParser jp = new JsonParserImpl();
 				processList = jp.parseProcesses(responseString);
 			} else { 
-				HashMap<String, String> map = new HashMap<String, String>();
-				map.put("com.example.error", "com.exaple.error");
-				processList.add(map);
+				return null;
 				}
 			System.out.println("5");
 			return processList;
 		}
 		
 		protected void onPostExecute(ArrayList<HashMap<String, String>> processList){
-			//if prcessList contains special expiration key, call sessionExpired
-			if (processList.get(0).containsKey("com.example.error")){
+			if (processList == null){
 				sessionExpired();
 			} else {
 				populateList(processList);

@@ -1,9 +1,11 @@
-<menu xmlns:android="http://schemas.android.com/apk/res/android" >
-
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+	<item
+        android:id="@+id/picture_save"
+        android:title="@string/picture_save"></item>
+	<item
+        android:id="@+id/refresh"
+        android:title="@string/refresh"></item>
     <item
-        android:id="@+id/menu_settings"
-        android:orderInCategory="100"
-        android:showAsAction="never"
-        android:title="@string/menu_settings"/>
-
+        android:id="@+id/log_out"
+        android:title="@string/log_out"></item>
 </menu>
