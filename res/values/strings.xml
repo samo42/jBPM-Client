@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="log_in_success">Log In Successful</string><string name="app_name">jBPM Client</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="menu_settings">Settings</string>
+    <string name="title_activity_main">MainActivity</string>
+    <string name="username">Username:</string>
+    <string name="password">Password:</string>
+    <string name="button_login">Log In</string>
+    <string name="title_activity_list_of_running_instances">Process List</string>
+    <string name="remember">Remember</string>
+    <string name="title_activity_set_up_server">SetUpServer</string>
+    <string name="server">Server URL: http://</string>
+    <string name="hint_username">username</string>
+    <string name="hint_password">password</string>
+    <string name="hint_server">server</string>
+    <string name="ok">OK</string>
+    <string name="clear">Clear</string>
+    <string name="logo">logo</string>
+    <string name="title_activity_instances_list">Instances List</string>
+    <string name="start">Start</string>
+    <string name="delete">Delete</string>
+    <string name="diagram">Diagram</string>
+    <string name="info">Info</string>
+    <string name="refresh">Refresh</string>
+    <string name="title_activity_picture">Picture</string>
+    <string name="employee_text">Please fill in your username: </string>
+    <string name="reason_text">Reason: </string>
+    <string name="hint_reason">Reason</string>
+    <string name="startdate">Start Date: </string>
+    <string name="state">State: </string>
+    <string name="version">Version: </string>
+    <string name="log_out">Log Out</string>
+    <string name="configure_server">Press menu -> Set Up Server to configure your server</string>
+    
+    <string name="log_in_unsuccess">Log In Failed</string>
+    <string name="processes_loaded">Processes loaded</string>
+    <string name="active_nodes">Active Nodes: </string>
+
+</resources>

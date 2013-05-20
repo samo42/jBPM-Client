@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical" >
+
+            <TextView
+            android:id="@+id/instance_id"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:textStyle="bold"
+            android:paddingTop="6dip"
+            android:paddingBottom="2dip"
+            android:textAppearance="?android:attr/textAppearanceLarge"/>
+		
+        <TextView
+            android:id="@+id/state"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingBottom="2dip"
+            android:layout_toRightOf="@+id/state_desc"
+            android:layout_below="@+id/instance_id"
+            android:textAppearance="?android:attr/textAppearanceSmall" />
+        
+        <TextView
+            android:id="@+id/state_desc"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingBottom="2dip"
+            android:layout_below="@+id/instance_id"
+            android:textAppearance="?android:attr/textAppearanceSmall"
+            android:text="@string/state" />
+
+        <TextView
+            android:id="@+id/startdate"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceSmall"
+            android:paddingBottom="2dip"
+            android:layout_toRightOf="@+id/startdate_desc"
+            android:layout_below="@+id/state_desc"
+            android:layout_alignRight="@+id/instance_id"/>
+        
+	<TextView
+            android:id="@+id/startdate_desc"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingBottom="2dip"
+            android:layout_below="@+id/state_desc"
+            android:textAppearance="?android:attr/textAppearanceSmall"
+            android:text="@string/startdate" />
+        
+</RelativeLayout>
